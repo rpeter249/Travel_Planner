@@ -1,3 +1,9 @@
+'''
+Name : Python Bytes
+Team Members : Kayla (kmcfarla) , David (dsanche2), Ruth (rpeter)
+'''
+
+
 import requests
 from bs4 import BeautifulSoup
 

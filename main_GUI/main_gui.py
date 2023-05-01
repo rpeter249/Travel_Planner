@@ -1,17 +1,32 @@
+'''
+Name : Python Bytes
+Team Members : Kayla (kmcfarla) , David (dsanche2), Ruth (rpeter)
+'''
+
+
+'''
+Function : main_gui.py 
+Main function to run the GUI screen
+
+'''
+
 import tkinter as tk
-from io import BytesIO
 from tkinter import messagebox
 import threading
 import pandas as pd
-from PIL import Image, ImageTk
-import urllib.request
 from tkinter import ttk
 from web_scraping import scrapeHolidify
 from flight_function import flight_info
 
 
+'''
+Function called when the search button is clicked 
+:param :
+:return:
+'''
 def search_button_click():
     try:
+        ## fetch values from the entry boxes
         source = source_entry.get().lower()
         dest = dest_entry.get().lower()
         arrival = arrival_entry.get().lower()
@@ -88,19 +103,29 @@ def fetch_flight_information(source, dest, arrival, departure):
                           + min_price + departure_string + '\n' + return_string)
 
 
+'''
+Function : fetch_flight_information
+This function fetches hotel information by web scraping from Holidify website.
+: param : source, dest, arrival, departure
+: return : 
+'''
 def fetch_web_scraping(dest):
+
+    #call the method to fetch the hotel list
     hotel_list = scrapeHolidify(dest.lower())
-    n = 10
-    hotel_listbox = tk.Listbox(root, height=n, width=100)
+
+    # listbox to display the flight hotel information
+    hotel_listbox = tk.Listbox(root, height=10, width=100)
     hotel_listbox.grid(row=9, column=1,columnspan=2)
 
+    # Loop through hotel and insert its name and price in the hotel list box.
     for hotel in hotel_list:
         name, price = hotel
         hotel_listbox.insert(tk.END, name + "---- Total Price :"+price)
 
 
 '''
-Funtion which returns a list of attractions with details based on the destination provided
+Function which returns a list of attractions with details based on the destination provided
 :param dest:
 :return:
 '''
@@ -112,6 +137,8 @@ def fetch_attraction_places(dest):
     # filter on attraction and state
     attraction_filter = df['attraction'].str.contains(dest, case=False)
     state_filter = df['state'].str.contains(dest, case=False)
+
+    # if attraction name found, fetch all the attractions in the state
     if attraction_filter.any():
         test_df = df[attraction_filter]
         state = test_df['state'].iloc[0]
@@ -122,31 +149,17 @@ def fetch_attraction_places(dest):
 
     result_text = ""
 
+    # loop through the df, fetch values
     for index, row in filtered_df.iterrows():
         attraction = row['attraction']
         ideal_duration = row["ideal_duration"]
         best_time = row["best_time"]
         description = row["description"]
-        url_match = row["url_match"]
-
-        # Load the image from the URL
-        print(url_match)
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        req = urllib.request.Request(url_match, headers=headers)
-        with urllib.request.urlopen(req) as url:
-            img_data = url.read()
-        image = Image.open(BytesIO(img_data))
 
         # Append the values to the result label
         result_text += "attraction: " + attraction + "\n" + "Ideal duration: " + str(
             ideal_duration) + "\n" + "Best time to visit: " + str(best_time) + "\n" \
                        + "Description: " + str(description) + "-------------------------------------\n"
-
-        # Resize the image and convert it to a Tkinter-compatible format
-        image = image.resize((200, 200))
-        photo = ImageTk.PhotoImage(image)
-
-        result_label.image_create(tk.END, image=photo)
 
         result_label.configure(state="normal")
         result_label.delete("1.0", tk.END)  # clear the existing content
@@ -156,15 +169,18 @@ def fetch_attraction_places(dest):
     scrollbar.config(command=result_label.yview)
 
 
-
+# create main GUI window
 root = tk.Tk()
 root.geometry("700x1000")
 root.title("Travel Planner")
 
+# create label headers
 header_label = ttk.Label(root, text="My Travel Planner", font=("Arial", 24, "bold"), anchor="center")
 header_label.grid(row=0, column=0, columnspan=3, sticky='nsew',pady=5)
 header_label.configure(anchor='center')
 
+
+# Create labels and entry fields for the user to input search parameters
 input_label = tk.Label(root, text="Enter source destination")
 input_label.grid(row=1, column=1, sticky='w')
 input_label.configure(anchor='center')
@@ -197,7 +213,7 @@ search_button = tk.Button(root, text="Search", command=search_button_click)
 search_button.grid(row=5, column=2, sticky="nw")
 
 
-
+# create label headers
 header_label_2 = ttk.Label(root, text="Flight Details ", font=("Arial", 18, "bold"), anchor="center")
 header_label_2.grid(row=6, column=0, columnspan=3, sticky='nsew')
 header_label_2.configure(anchor='center')
