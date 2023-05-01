@@ -28,28 +28,64 @@ def search_button_click():
     t3 = threading.Thread(target=fetch_flight_information, args = (source, dest, arrival, departure , ))
     t3.start()
 
+'''
+fetch_flight_information: creates tkinter boxes of data for flights given
+the source, destination, arrival date and departure date
+input: source, dest, arrival, departure - string
+'''
 def fetch_flight_information(source, dest, arrival, departure):
-    flight_list = flight_info(source, dest, arrival, departure)
+    flight_list = flight_info(source, dest, departure, arrival)
     flight_listbox = tk.Listbox(root, height=10, width=100)
     flight_listbox.grid(row=7, column=1,columnspan=2)
-    print(flight_list)
-    for flights in flight_list:
+    if (flight_list == None):
+        flight_listbox.insert(tk.END, 'No available flights')
+        return
+    min_price = 1000000
+    index = 1
+    for flight in flight_list:
         itinerary1 = flight['itinerary1']
         itinerary2 = flight['itinerary2']
 
-        departure_string = "Duration of the first flight: %s. The departure is from: \
-            %s. The departure time is: %s. You will arrive in the airport with IATA code: %s\
-                 at %s time."%(itinerary1['duration'], itinerary1['departure'],
+        departure_string = '''Duration of the first flight: %s. The departure is from: %s.\
+              The departure time is: %s. You will arrive in the airport with IATA code: %s\
+                 at %s time.'''%(itinerary1['duration'], itinerary1['departure'],
                                          itinerary1['departure_time'], itinerary1['arrival'],
                                          itinerary1['arrival_time'])
-
-        return_string = "Duration of the second flight: %s. The departure is from: \
+        
+        return_string = "Duration of the first flight: %s. The departure is from: \
             %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
                 at %s time."%(itinerary2['duration'], itinerary2['departure'],
                                          itinerary2['departure_time'], itinerary2['arrival'],
                                          itinerary2['arrival_time'])
 
-        flight_listbox.insert(tk.END, departure_string + '\n' + return_string)
+        price = flight['price']
+
+        if (price < min_price):
+            min_flight = flight
+            min_price = price
+
+        total_price = str(price)
+        flight_listbox.insert(tk.END, str(index) + '. ' + departure_string + '\n' + return_string + '\nTotal Price: %s'%(total_price))
+
+    itinerary1 = min_flight['itinerary1']
+    itinerary2 = min_flight['itinerary2']
+
+    departure_string = "Duration of the first flight: %s. The departure is from: \
+        %s. The departure time is: %s. You will arrive in the airport with IATA code: %s\
+                at %s time."%(itinerary1['duration'], itinerary1['departure'],
+                                        itinerary1['departure_time'], itinerary1['arrival'],
+                                        itinerary1['arrival_time'])
+    
+    return_string = "Duration of the first flight: %s. The departure is from: \
+        %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
+            at %s time."%(itinerary2['duration'], itinerary2['departure'],
+                                        itinerary2['departure_time'], itinerary2['arrival'],
+                                        itinerary2['arrival_time'])
+
+    min_price = str(min_price)
+
+    flight_listbox.insert(tk.END, 'Flight details with the minimum price: ' 
+                          + min_price + departure_string + '\n' + return_string)
 
 
 def fetch_web_scraping(dest):
