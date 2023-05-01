@@ -43,44 +43,64 @@ def search_button_click():
     t3 = threading.Thread(target=fetch_flight_information, args = (source, dest, arrival, departure , ))
     t3.start()
 
-
 '''
-Function : fetch_flight_information
-This function fetches flight information based on the source, destination, arrival and departure parameters
-: param : source, dest, arrival, departure
-: return : 
+fetch_flight_information: creates tkinter boxes of data for flights given
+the source, destination, arrival date and departure date
+input: source, dest, arrival, departure - string
 '''
 def fetch_flight_information(source, dest, arrival, departure):
-
-    # Get the flight information for the provided parameters
-    flight_list = flight_info(source, dest, arrival, departure)
-
-    # listbox to display the flight information
+    flight_list = flight_info(source, dest, departure, arrival)
     flight_listbox = tk.Listbox(root, height=10, width=100)
     flight_listbox.grid(row=7, column=1,columnspan=2)
+    if (flight_list == None):
+        flight_listbox.insert(tk.END, 'No available flights')
+        return
+    min_price = 1000000
+    index = 1
+    for flight in flight_list:
+        itinerary1 = flight['itinerary1']
+        itinerary2 = flight['itinerary2']
 
-    if len(flight_list) == 0 :
-        flight_listbox.insert(tk.END, 'No Flights Found')
-    else:
-        # Loop through the list of flights and extract the itinerary information
-        for flights in flight_list:
-            itinerary1 = flights['itinerary1']
-            itinerary2 = flights['itinerary2']
+        departure_string = '''Duration of the first flight: %s. The departure is from: %s.\
+              The departure time is: %s. You will arrive in the airport with IATA code: %s\
+                 at %s time.'''%(itinerary1['duration'], itinerary1['departure'],
+                                         itinerary1['departure_time'], itinerary1['arrival'],
+                                         itinerary1['arrival_time'])
+        
+        return_string = "Duration of the first flight: %s. The departure is from: \
+            %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
+                at %s time."%(itinerary2['duration'], itinerary2['departure'],
+                                         itinerary2['departure_time'], itinerary2['arrival'],
+                                         itinerary2['arrival_time'])
 
-            departure_string = "Duration of the first flight: %s. The departure is from: \
-                %s. The departure time is: %s. You will arrive in the airport with IATA code: %s\
-                     at %s time."%(itinerary1['duration'], itinerary1['departure'],
-                                             itinerary1['departure_time'], itinerary1['arrival'],
-                                             itinerary1['arrival_time'])
+        price = flight['price']
 
-            return_string = "Duration of the second flight: %s. The departure is from: \
-                %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
-                    at %s time."%(itinerary2['duration'], itinerary2['departure'],
-                                             itinerary2['departure_time'], itinerary2['arrival'],
-                                             itinerary2['arrival_time'])
+        if (price < min_price):
+            min_flight = flight
+            min_price = price
 
-            # insert values in the listbox
-            flight_listbox.insert(tk.END, departure_string + '\n' + return_string)
+        total_price = str(price)
+        flight_listbox.insert(tk.END, str(index) + '. ' + departure_string + '\n' + return_string + '\nTotal Price: %s'%(total_price))
+
+    itinerary1 = min_flight['itinerary1']
+    itinerary2 = min_flight['itinerary2']
+
+    departure_string = "Duration of the first flight: %s. The departure is from: \
+        %s. The departure time is: %s. You will arrive in the airport with IATA code: %s\
+                at %s time."%(itinerary1['duration'], itinerary1['departure'],
+                                        itinerary1['departure_time'], itinerary1['arrival'],
+                                        itinerary1['arrival_time'])
+    
+    return_string = "Duration of the first flight: %s. The departure is from: \
+        %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
+            at %s time."%(itinerary2['duration'], itinerary2['departure'],
+                                        itinerary2['departure_time'], itinerary2['arrival'],
+                                        itinerary2['arrival_time'])
+
+    min_price = str(min_price)
+
+    flight_listbox.insert(tk.END, 'Flight details with the minimum price: ' 
+                          + min_price + departure_string + '\n' + return_string)
 
 
 '''
