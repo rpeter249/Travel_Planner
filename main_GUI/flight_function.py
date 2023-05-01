@@ -1,5 +1,3 @@
-import requests
-import json
 import pandas as pd
 
 '''
@@ -48,12 +46,16 @@ def flight_info(origin, destination, departure_date, return_date):
         Get the iata code ,if there is one, of both the origin 
         and destination
         '''
+        
+        if (origin_response.data == [] or dest_response.data == []):
+            return None
+        
         origin_iata = origin_response.data[0]['iataCode']
         dest_iata = dest_response.data[0]['iataCode']
 
         if (origin_iata == "" or dest_iata == ""):
             print('No valid airline')
-            return
+            return None
         else:
             '''
             Get all flight info given origin, destination, departure date,
@@ -65,21 +67,25 @@ def flight_info(origin, destination, departure_date, return_date):
                 departureDate=departure_date,
                 returnDate=return_date,
                 adults=1,
+                nonStop='true',
                 currencyCode='USD',
                 max=10
                 )
+            
+            if (flight_response.data == []):
+                return None
             
             flights = []
             for flight in flight_response.data:
                 info = dict()
                 
-                itinerary1 = {'duration':flight['itineraries'][0]['duration'],
+                itinerary1 = {'duration':str(pd.Timedelta(flight['itineraries'][0]['duration'])),
                               'departure':flight['itineraries'][0]['segments'][0]['departure']['iataCode'],
                               'departure_time':flight['itineraries'][0]['segments'][0]['departure']['at'],
                               'arrival':flight['itineraries'][0]['segments'][0]['arrival']['iataCode'],
                               'arrival_time':flight['itineraries'][0]['segments'][0]['arrival']['at']}
                 
-                itinerary2 = {'duration':flight['itineraries'][1]['duration'],
+                itinerary2 = {'duration':str(pd.Timedelta(flight['itineraries'][1]['duration'])),
                               'departure':flight['itineraries'][1]['segments'][0]['departure']['iataCode'],
                               'departure_time':flight['itineraries'][1]['segments'][0]['departure']['at'],
                               'arrival':flight['itineraries'][1]['segments'][0]['arrival']['iataCode'],
@@ -87,11 +93,11 @@ def flight_info(origin, destination, departure_date, return_date):
                 
                 info.update({'itinerary1':itinerary1})
                 info.update({'itinerary2':itinerary2})
-                info.update({'price':flight['price']['total']})
+                info.update({'price':float(flight['price']['total'])})
                 
                 flights += [info]
                 
             return flights
     except ResponseError:
         print('Not a valid city')
-        return
+        return None
