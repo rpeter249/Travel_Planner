@@ -1,3 +1,11 @@
+'''
+Name : Python Bytes
+Team Members : Kayla (kmcfarla) , David (dsanche2), Ruth (rpeter)
+'''
+
+
+import requests
+import json
 import pandas as pd
 
 '''
@@ -51,7 +59,9 @@ def flight_info(origin, destination, departure_date, return_date):
             return None
         
         origin_iata = origin_response.data[0]['iataCode']
+        print(origin_iata)
         dest_iata = dest_response.data[0]['iataCode']
+        print(dest_iata)
 
         if (origin_iata == "" or dest_iata == ""):
             print('No valid airline')
