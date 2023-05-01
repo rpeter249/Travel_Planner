@@ -7,16 +7,15 @@ from PIL import Image, ImageTk
 import urllib.request
 from tkinter import ttk
 from web_scraping import scrapeHolidify
+from flight_function import flight_information
 
 
 def search_button_click():
-    """
-    """
     try:
-        source = source_entry.get()
-        dest = dest_entry.get()
-        arrival = arrival_entry.get()
-        departure = departure_entry.get()
+        source = source_entry.get().lower()
+        dest = dest_entry.get().lower()
+        arrival = arrival_entry.get().lower()
+        departure = departure_entry.get().lower()
     except ValueError:
         messagebox.showerror("Error", "Invalid input")
         return
@@ -26,28 +25,39 @@ def search_button_click():
     t1.start()
     t2 = threading.Thread(target=fetch_web_scraping, args=(dest,))
     t2.start()
+    t3 = threading.Thread(target=fetch_flight_information, args = (source, dest, arrival, departure , ))
+    t3.start()
+
+def fetch_flight_information(source, dest, arrival, departure):
+    flight_list = flight_information(source, dest, arrival, departure)
+    flight_listbox = tk.Listbox(root, height=10, width=100)
+    flight_listbox.grid(row=7, column=1,columnspan=2)
+    print(flight_list)
+    for flights in flight_list:
+        print(flights)
+        flight_listbox.insert(tk.END, flights)
 
 
 def fetch_web_scraping(dest):
     hotel_list = scrapeHolidify(dest.lower())
     n = 10
     hotel_listbox = tk.Listbox(root, height=n, width=100)
-    hotel_listbox.grid(row=8, column=1,columnspan=2)
+    hotel_listbox.grid(row=9, column=1,columnspan=2)
 
     for hotel in hotel_list:
         name, price = hotel
         hotel_listbox.insert(tk.END, name + "---- Total Price :"+price)
+
+
+'''
+Funtion which returns a list of attractions with details based on the destination provided
+:param dest:
+:return:
+'''
 def fetch_attraction_places(dest):
-    '''
-    Funtion which returns a list of attractions with details based on the destination provided
-    :param dest:
-    :return:
-    '''
+
     df = pd.read_csv('data/tourist_attractions.csv')
 
-    # ### filter on attraction and state
-    # filtered_df = df[(df['attraction'].str.contains(dest, case=False)) |
-    #                  (df['state'].str.contains(dest, case=False))]
 
     # filter on attraction and state
     attraction_filter = df['attraction'].str.contains(dest, case=False)
@@ -143,18 +153,18 @@ header_label_2.grid(row=6, column=0, columnspan=3, sticky='nsew')
 header_label_2.configure(anchor='center')
 
 header_label_3 = ttk.Label(root, text="Hotel Details ", font=("Arial", 18, "bold"), anchor="center")
-header_label_3.grid(row=7, column=0, columnspan=3, sticky='nsew')
+header_label_3.grid(row=8, column=0, columnspan=3, sticky='nsew')
 header_label_3.configure(anchor='center')
 
 
 header_label_4 = ttk.Label(root, text="Attraction Details ", font=("Arial", 18, "bold"), anchor="center")
-header_label_4.grid(row=9, column=0, columnspan=3, sticky='nsew')
+header_label_4.grid(row=10, column=0, columnspan=3, sticky='nsew')
 header_label_4.configure(anchor='center')
 
 
 # Create a frame to hold the result_label and scrollbar
 result_frame = ttk.Frame(root)
-result_frame.grid(row=  10, column=1, columnspan=2, sticky="nsew")
+result_frame.grid(row=  11, column=1, columnspan=2, sticky="nsew")
 root.rowconfigure(5, weight=1)
 root.columnconfigure(1, weight=1)
 root.columnconfigure(2, weight=1)
