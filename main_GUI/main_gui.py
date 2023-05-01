@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 import urllib.request
 from tkinter import ttk
 from web_scraping import scrapeHolidify
-from flight_function import flight_information
+from flight_function import flight_info
 
 
 def search_button_click():
@@ -29,13 +29,27 @@ def search_button_click():
     t3.start()
 
 def fetch_flight_information(source, dest, arrival, departure):
-    flight_list = flight_information(source, dest, arrival, departure)
+    flight_list = flight_info(source, dest, arrival, departure)
     flight_listbox = tk.Listbox(root, height=10, width=100)
     flight_listbox.grid(row=7, column=1,columnspan=2)
     print(flight_list)
     for flights in flight_list:
-        print(flights)
-        flight_listbox.insert(tk.END, flights)
+        itinerary1 = flight['itinerary1']
+        itinerary2 = flight['itinerary2']
+
+        departure_string = "Duration of the first flight: %s. The departure is from: \
+            %s. The departure time is: %s. You will arrive in the airport with IATA code: %s\
+                 at %s time."%(itinerary1['duration'], itinerary1['departure'],
+                                         itinerary1['departure_time'], itinerary1['arrival'],
+                                         itinerary1['arrival_time'])
+
+        return_string = "Duration of the second flight: %s. The departure is from: \
+            %s. The departure time is: %s. You will arrive in the airport with IATA code: %s \
+                at %s time."%(itinerary2['duration'], itinerary2['departure'],
+                                         itinerary2['departure_time'], itinerary2['arrival'],
+                                         itinerary2['arrival_time'])
+
+        flight_listbox.insert(tk.END, departure_string + '\n' + return_string)
 
 
 def fetch_web_scraping(dest):
